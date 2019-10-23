@@ -42,9 +42,15 @@ export default class Main extends Component {
 
     this.setState({ loading: true, error: false });
 
-    const { newRepo, repositories } = this.state;
-
     try {
+      const { newRepo, repositories } = this.state;
+
+      if (newRepo === '') throw 'Você precisa indicar um repositório';
+
+      const hasRepo = repositories.find(r => r.name === newRepo);
+
+      if (hasRepo) throw 'Repositório duplicado';
+
       const response = await api.get(`/repos/${newRepo}`);
 
       const data = {
@@ -54,10 +60,11 @@ export default class Main extends Component {
       this.setState({
         repositories: [...repositories, data],
         newRepo: '',
-        loading: false,
       });
     } catch (error) {
-      this.setState({ error: true, loading: false });
+      this.setState({ error: true });
+    } finally {
+      this.setState({ loading: false });
     }
   };
 
