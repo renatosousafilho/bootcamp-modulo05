@@ -50,6 +50,27 @@ export default class Repository extends Component {
     });
   }
 
+  loadIssues = async () => {
+    const { match } = this.props;
+    const { filters, filterIndex } = this.state;
+
+    const repoName = decodeURIComponent(match.params.repository);
+
+    const response = await api.get(`/repos/${repoName}/issues`, {
+      params: {
+        state: filters[filterIndex].state,
+        per_page: 5,
+      },
+    });
+
+    this.setState({ issues: response.data });
+  };
+
+  handleFilterClick = async filterIndex => {
+    await this.setState({ filterIndex });
+    this.loadIssues();
+  };
+
   render() {
     const { repository, issues, loading, filters, filterIndex } = this.state;
 
@@ -69,7 +90,11 @@ export default class Repository extends Component {
         <IssueList>
           <IssueFilter active={filterIndex}>
             {filters.map((filter, index) => (
-              <button type="button" key={filter.label}>
+              <button
+                type="button"
+                key={filter.label}
+                onClick={() => this.handleFilterClick(index)}
+              >
                 {filter.label}
               </button>
             ))}
